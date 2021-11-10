@@ -1,0 +1,109 @@
+{
+  "name": "@calebboyd/create-tsp",
+  "version": "1.0.0",
+  "description": "A npm init command for seeding a server side typescript project",
+  "bin": {
+    "create-tsp": "./bin.js"
+  },
+  "files": [
+    "lib",
+    "!**/*.test.js",
+    "vscode",
+    "tsconfig.json"
+  ],
+  "engines": {
+    "npm": ">=7",
+    "node": ">=14"
+  },
+  "repository": {
+    "type": "git",
+    "url": "ssh://git@github.com/calebboyd/create-tsp.git"
+  },
+  "keywords": [],
+  "scripts": {
+    "commitlint": "commitlint -f $(git rev-list --tags --max-count=1) -t $(git log --pretty=%H | head -1)",
+    "lint": "eslint \"src/**/*.ts\" --fix",
+    "build": "shx rm -rf lib && tsc",
+    "watch:typescript": "npm run build -- -w",
+    "watch:test": "tap -Rspec --watch",
+    "watch": "npm run build && concurrently -k \"npm:watch:typescript\" \"npm:watch:test\" -c blue,green",
+    "test": "tap"
+  },
+  "tap": {
+    "test-regex": "src\\/.*test\\.ts",
+    "node-arg": [
+      "--enable-source-maps"
+    ]
+  },
+  "prettier": {
+    "parser": "typescript",
+    "semi": false,
+    "singleQuote": true,
+    "printWidth": 100
+  },
+  "eslintConfig": {
+    "parser": "@typescript-eslint/parser",
+    "plugins": [
+      "@typescript-eslint"
+    ],
+    "extends": [
+      "eslint:recommended",
+      "plugin:@typescript-eslint/recommended",
+      "prettier",
+      "plugin:prettier/recommended"
+    ],
+    "ignorePatterns": [
+      "*.d.ts"
+    ],
+    "rules": {
+      "@typescript-eslint/explicit-function-return-type": 0,
+      "@typescript-eslint/no-use-before-define": 0
+    }
+  },
+  "commitlint": {
+    "extends": [
+      "@commitlint/config-angular"
+    ],
+    "rules": {
+      "type-enum": [
+        2,
+        "always",
+        [
+          "build",
+          "ci",
+          "docs",
+          "feat",
+          "fix",
+          "perf",
+          "refactor",
+          "release",
+          "revert",
+          "style",
+          "test"
+        ]
+      ]
+    }
+  },
+  "dependencies": {
+    "minimist": "^1.2.5"
+  },
+  "devDependencies": {
+    "@commitlint/cli": "^14.1.0",
+    "@commitlint/config-angular": "^14.1.0",
+    "@types/minimist": "^1.2.2",
+    "@types/node": "^16.11.7",
+    "@types/tap": "^15.0.5",
+    "@typescript-eslint/eslint-plugin": "^5.3.1",
+    "@typescript-eslint/parser": "^5.3.1",
+    "concurrently": "^6.3.0",
+    "dotenv": "^10.0.0",
+    "eslint": "^8.2.0",
+    "eslint-config-prettier": "~8.3.0",
+    "eslint-plugin-prettier": "^4.0.0",
+    "prettier": "^2.4.1",
+    "shx": "^0.3.3",
+    "tap": "^15.0.10",
+    "ts-node": "^10.4.0",
+    "typescript": "^4.4.4"
+  }
+}
