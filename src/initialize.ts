@@ -1,36 +1,43 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { readFileSync, writeFileSync, mkdirSync, appendFileSync } from 'fs'
-import { join, resolve, basename } from 'path'
+import { readFileSync, writeFileSync, mkdirSync, appendFileSync } from 'node:fs'
+import { join, resolve, basename } from 'node:path'
+import { spawn } from 'node:child_process'
+
 import parseArgv from 'minimist'
-import { spawn } from 'child_process'
 
 let cwd = process.cwd(),
   outPkg: any = {}
 
+function readJson(baseDir: string, file: string) {
+  return JSON.parse(readFileSync(join(baseDir, file), 'utf-8'))
+}
+
 const pkgDir = resolve(__dirname, '..'),
   args = parseArgv(process.argv),
   isRoot = args.root,
-  newProject = resolve(args._[2]) !== process.cwd(),
-  project = newProject ? args._[2] : basename(cwd),
-  readJson = (file: string): JSON => JSON.parse(readFileSync(join(pkgDir, file), 'utf-8')),
-  pkgJson = readJson('package.json') as any,
-  tsconfigJson = readJson('tsconfig.json'),
-  nodeLtsVersion = process.version, //todo query and auto run ncu?
-  vsCodeExtensions = readJson('vscode/extensions.json'),
-  vsCodeSettings = readJson('vscode/settings.json'),
+  projectIsRoot = typeof isRoot === 'string',
+  newProject = Boolean((args._[2] && resolve(args._[2]) !== process.cwd()) || projectIsRoot),
+  project = projectIsRoot ? isRoot : newProject ? args._[2] : basename(cwd),
+  pkgJson = readJson(pkgDir, 'package.json') as any,
+  tsconfigJson = readJson(pkgDir, 'tsconfig.json'),
+  nodeVersion = process.version.replace('v', ''),
+  vsCodeExtensions = readJson(pkgDir, 'vscode/extensions.json'),
+  vsCodeSettings = readJson(pkgDir, 'vscode/settings.json'),
   license = readFileSync(join(pkgDir, 'LICENSE'), 'utf-8').replace(
-    '2019',
+    '2020',
     new Date().getFullYear().toString()
   )
 
+console.log('@calebboyd/create-tsp: ', pkgJson.version)
+
 try {
-  outPkg = JSON.parse(readFileSync(join(cwd, 'package.json')).toString())
+  outPkg = readJson(cwd, 'package.json')
 } catch (e) {
   void e
 }
 
 const devDeps = Object.assign({}, outPkg.devDependencies, pkgJson.devDependencies)
-delete devDeps['@types/minimist']
+devDeps['@types/minimist'] = undefined
 
 Object.assign(outPkg, 'private' in outPkg ? { private: outPkg.private } : {})
 
@@ -52,7 +59,6 @@ outPkg.exports = {
 outPkg.engines = pkgJson.engines
 outPkg.files = ['lib'].concat(outPkg.files || [])
 outPkg.scripts = pkgJson.scripts
-outPkg.tap = pkgJson.tap
 outPkg.dependencies = outPkg.dependencies || {}
 outPkg.devDependencies = devDeps
 outPkg.mocha = pkgJson.mocha
@@ -60,19 +66,20 @@ outPkg.prettier = pkgJson.prettier
 outPkg.commitlint = pkgJson.commitlint
 outPkg.eslintConfig = pkgJson.eslintConfig
 
-delete outPkg.devDependencies['@types/minimist']
+outPkg.devDependencies['@types/minimist'] = undefined
 if (!isRoot) {
-  delete outPkg.scripts.commitlint
-  delete outPkg.commitlint
-  delete outPkg.devDependencies['@commitlint/cli']
-  delete outPkg.devDependencies['@commitlint/config-angular']
+  outPkg.scripts.commitlint =
+    outPkg.commitlint =
+    outPkg.devDependencies['@commitlint/cli'] =
+    outPkg.devDependencies['@commitlint/config-angular'] =
+      undefined
 }
 
 function tryAction(fn: any): void {
   try {
     fn()
-  } catch (e) {
-    console.error('Failed trying to run init\n\t' + e.message)
+  } catch (e: any) {
+    console.error('Failed trying to run init\n\t' + e?.message)
   }
 }
 
@@ -88,7 +95,7 @@ console.log('Writing package files...')
 
 tryAction(() => mkdirSync(join(cwd, 'src')))
 if (isRoot) {
-  tryAction(() => appendFileSync(join(cwd, '.node-version'), nodeLtsVersion))
+  tryAction(() => appendFileSync(join(cwd, '.node-version'), nodeVersion))
   tryAction(() => mkdirSync(join(cwd, '.vscode')))
   tryAction(() =>
     writeFileSync(

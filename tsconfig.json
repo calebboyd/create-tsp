@@ -1,11 +1,11 @@
 {
   "compilerOptions": {
     "outDir": "lib",
-    "target": "es2018",
+    "target": "es2020",
     "module": "commonjs",
     "moduleResolution": "node",
     "lib": [
-      "es2018"
+      "es2020"
     ],
     "declaration": true,
     "skipLibCheck": true,
@@ -19,5 +19,9 @@
   ],
   "include": [
     "src/**/*.ts"
-  ]
+  ],
+  "ts-node": {
+    "transpileOnly": true,
+    "transpiler": "ts-node/transpilers/swc"
+  }
 }

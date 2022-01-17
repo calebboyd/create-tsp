@@ -1,6 +1,6 @@
 {
   "name": "@calebboyd/create-tsp",
-  "version": "1.0.0",
+  "version": "1.2.1",
   "description": "A npm init command for seeding a server side typescript project",
   "bin": {
     "create-tsp": "./bin.js"
@@ -23,17 +23,9 @@
   "scripts": {
     "commitlint": "commitlint -f $(git rev-list --tags --max-count=1) -t $(git log --pretty=%H | head -1)",
     "lint": "eslint \"src/**/*.ts\" --fix",
+    "prebuild": "npm run lint",
     "build": "shx rm -rf lib && tsc",
-    "watch:typescript": "npm run build -- -w",
-    "watch:test": "tap -Rspec --watch",
-    "watch": "npm run build && concurrently -k \"npm:watch:typescript\" \"npm:watch:test\" -c blue,green",
-    "test": "tap"
-  },
-  "tap": {
-    "test-regex": "src\\/.*test\\.ts",
-    "node-arg": [
-      "--enable-source-maps"
-    ]
+    "prepublishOnly": "npm run build"
   },
   "prettier": {
     "parser": "typescript",
@@ -88,22 +80,20 @@
     "minimist": "^1.2.5"
   },
   "devDependencies": {
-    "@commitlint/cli": "^14.1.0",
-    "@commitlint/config-angular": "^14.1.0",
+    "@commitlint/cli": "^16.0.2",
+    "@commitlint/config-angular": "^16.0.0",
+    "@swc/core": "^1.2.130",
     "@types/minimist": "^1.2.2",
-    "@types/node": "^16.11.7",
-    "@types/tap": "^15.0.5",
-    "@typescript-eslint/eslint-plugin": "^5.3.1",
-    "@typescript-eslint/parser": "^5.3.1",
-    "concurrently": "^6.3.0",
-    "dotenv": "^10.0.0",
-    "eslint": "^8.2.0",
+    "@types/node": "^16",
+    "@typescript-eslint/eslint-plugin": "^5.10.0",
+    "@typescript-eslint/parser": "^5.10.0",
+    "dotenv": "^14.2.0",
+    "eslint": "^8.7.0",
     "eslint-config-prettier": "~8.3.0",
     "eslint-plugin-prettier": "^4.0.0",
-    "prettier": "^2.4.1",
-    "shx": "^0.3.3",
-    "tap": "^15.0.10",
+    "prettier": "^2.5.1",
+    "shx": "^0.3.4",
     "ts-node": "^10.4.0",
-    "typescript": "^4.4.4"
+    "typescript": "^4.5.4"
   }
 }
